@@ -1,6 +1,5 @@
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -15,15 +14,24 @@ public class Sample {
 			statement.setQueryTimeout(30); // set timeout to 30 sec.
 
 			statement.executeUpdate("drop table if exists person");
-			statement.executeUpdate("create table person (id integer, name string)");
-			statement.executeUpdate("insert into person values(1, 'leo')");
-			statement.executeUpdate("insert into person values(2, 'yui')");
-			ResultSet rs = statement.executeQuery("select * from person");
-			while (rs.next()) {
-				// read the result set
-				System.out.println("name = " + rs.getString("name"));
-				System.out.println("id = " + rs.getInt("id"));
-			}
+			statement.executeUpdate(
+				"create table person (id integer, name string, age integer, cpf string)"
+			);
+			statement.executeUpdate(
+				"insert into person values(1, 'leo', 20, '12345678910')"
+			);
+			statement.executeUpdate(
+				"insert into person values(2, 'yui', 30, '12345678911')"
+			);
+			statement.executeUpdate(
+				"insert into person values(3, 'lala', 40, '12345678912')"
+			);
+			statement.executeUpdate(
+				"insert into person values(4, 'momo', 50, '12345678913')"
+			);
+			statement.executeUpdate(
+				"insert into person values(5, 'gigi', 60, '12345678914')"
+			);
 		} catch (SQLException e) {
 			// if the error message is "out of memory",
 			// it probably means no database file is found
