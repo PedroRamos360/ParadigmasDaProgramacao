@@ -1,11 +1,11 @@
-package src.database;
+package src.database.Database;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import src.objects.Book;
+import src.objects.Book.Book;
 
 public class Database {
 
