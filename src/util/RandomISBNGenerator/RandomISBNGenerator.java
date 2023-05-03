@@ -1,4 +1,4 @@
-package src.objects.RandomISBNGenerator;
+package src.util.RandomISBNGenerator;
 
 import java.util.Random;
 

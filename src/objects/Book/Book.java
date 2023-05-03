@@ -1,6 +1,6 @@
 package src.objects.Book;
 
-import src.objects.RandomISBNGenerator.RandomISBNGenerator;
+import src.util.RandomISBNGenerator.RandomISBNGenerator;
 
 public class Book {
 

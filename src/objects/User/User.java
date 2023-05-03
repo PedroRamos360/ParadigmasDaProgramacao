@@ -37,6 +37,10 @@ public class User {
 		return userType;
 	}
 
+	public ArrayList<Loan> getLoans() {
+		return loans;
+	}
+
 	public void setPenalty(float penalty) {
 		this.penalty = penalty;
 	}
