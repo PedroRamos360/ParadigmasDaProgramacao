@@ -5,6 +5,8 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import src.Main.Main;
 import src.objects.Book.Book;
 
 public class Database {
@@ -29,7 +31,7 @@ public class Database {
 	public void createNewDatabase() {
 		try {
 			this.statement.executeUpdate(
-					"create table book (name text, authors text, year integer, edition integer, editor text, isbn text)"
+					"create table book (id text, name text, authors text, year integer, edition integer, editor text, isbn text)"
 				);
 		} catch (SQLException e) {
 			if (!e.getMessage().contains("table book already exists")) {
@@ -56,11 +58,13 @@ public class Database {
 				throw new SQLException("Nenhum livro encontrado");
 			}
 			Book book = new Book(
+				rs.getString("id"),
 				rs.getString("name"),
 				rs.getString("authors"),
 				rs.getInt("year"),
 				rs.getInt("edition"),
-				rs.getString("editor")
+				rs.getString("editor"),
+				rs.getString("isbn")
 			);
 
 			return book;
@@ -70,24 +74,30 @@ public class Database {
 		}
 	}
 
-	public Book getBookByName(String name) {
+	public ArrayList<Book> getBooksByName(String name) {
 		try {
 			ResultSet rs =
 				this.statement.executeQuery(
-						"SELECT * FROM book WHERE name = '" + name + "'"
+						"SELECT * FROM book WHERE name LIKE '%" + name + "%'"
 					);
 			if (!rs.next()) {
 				throw new SQLException("Nenhum livro encontrado");
 			}
-			Book book = new Book(
-				rs.getString("name"),
-				rs.getString("authors"),
-				rs.getInt("year"),
-				rs.getInt("edition"),
-				rs.getString("editor")
-			);
+			ArrayList<Book> books = new ArrayList<Book>();
+			do {
+				Book book = new Book(
+					rs.getString("id"),
+					rs.getString("name"),
+					rs.getString("authors"),
+					rs.getInt("year"),
+					rs.getInt("edition"),
+					rs.getString("editor"),
+					rs.getString("isbn")
+				);
+				books.add(book);
+			} while (rs.next());
 
-			return book;
+			return books;
 		} catch (SQLException e) {
 			System.err.println(e.getMessage());
 			return null;
@@ -104,17 +114,70 @@ public class Database {
 				throw new SQLException("Nenhum livro encontrado");
 			}
 			Book book = new Book(
+				rs.getString("id"),
 				rs.getString("name"),
 				rs.getString("authors"),
 				rs.getInt("year"),
 				rs.getInt("edition"),
-				rs.getString("editor")
+				rs.getString("editor"),
+				rs.getString("isbn")
 			);
 
 			return book;
 		} catch (SQLException e) {
 			System.err.println(e.getMessage());
 			return null;
+		}
+	}
+
+	public Book getBookById(String id) {
+		try {
+			ResultSet rs =
+				this.statement.executeQuery(
+						"SELECT * FROM book WHERE id = '" + id + "'"
+					);
+			if (!rs.next()) {
+				throw new SQLException("Nenhum livro encontrado");
+			}
+			Book book = new Book(
+				rs.getString("id"),
+				rs.getString("name"),
+				rs.getString("authors"),
+				rs.getInt("year"),
+				rs.getInt("edition"),
+				rs.getString("editor"),
+				rs.getString("isbn")
+			);
+
+			return book;
+		} catch (SQLException e) {
+			System.err.println(e.getMessage());
+			return null;
+		}
+	}
+
+	public void editBook(Book book) {
+		try {
+			ResultSet rs =
+				this.statement.executeQuery(
+						"SELECT * FROM book WHERE isbn = '" + book.getIsbn() + "'"
+					);
+			if (!rs.next()) {
+				throw new SQLException("Livro não encontrado");
+			}
+			String update = String.format(
+				"update book set name = '%s', authors = '%s', year = %d, edition = %d, editor = '%s' where isbn = '%s'",
+				book.getName(),
+				book.getAuthors(),
+				book.getYear(),
+				book.getEdition(),
+				book.getEditor(),
+				book.getIsbn()
+			);
+
+			this.statement.executeUpdate(update);
+		} catch (SQLException e) {
+			System.err.println(e.getMessage());
 		}
 	}
 
@@ -125,14 +188,16 @@ public class Database {
 				throw new SQLException("Nenhum livro encontrado");
 			}
 			do {
-				print("========================================");
-				print("Nome: " + rs.getString("name"));
-				print("Autor: " + rs.getString("authors"));
-				print("Ano: " + rs.getInt("year"));
-				print("Edição: " + rs.getInt("edition"));
-				print("Editora: " + rs.getString("editor"));
-				print("ISBN: " + rs.getString("isbn"));
-				print("========================================");
+				Book book = new Book(
+					rs.getString("id"),
+					rs.getString("name"),
+					rs.getString("authors"),
+					rs.getInt("year"),
+					rs.getInt("edition"),
+					rs.getString("editor"),
+					rs.getString("isbn")
+				);
+				Main.printBook(book);
 			} while (rs.next());
 		} catch (SQLException e) {
 			System.err.println(e.getMessage());
@@ -153,7 +218,8 @@ public class Database {
 	public void addBook(Book book) {
 		try {
 			String update = String.format(
-				"insert into book (name, authors, year, edition, editor, isbn) values ('%s', '%s', %d, %d, '%s', '%s')",
+				"insert into book (id, name, authors, year, edition, editor, isbn) values ('%s', '%s', '%s', %d, %d, '%s', '%s')",
+				book.getId(),
 				book.getName(),
 				book.getAuthors(),
 				book.getYear(),

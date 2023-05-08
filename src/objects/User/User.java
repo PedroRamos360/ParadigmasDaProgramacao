@@ -12,6 +12,10 @@ public class User {
 	private String userType;
 	private ArrayList<Loan> loans;
 
+	public void addLoan(Loan loan) {
+		this.loans.add(loan);
+	}
+
 	public User(String name, String userType) {
 		UUID uuid = UUID.randomUUID();
 		this.id = uuid.toString();

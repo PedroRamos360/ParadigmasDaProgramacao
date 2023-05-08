@@ -7,19 +7,22 @@ import java.util.Scanner;
 import src.database.Database.Database;
 import src.objects.Book.Book;
 import src.objects.Loan.Loan;
+import src.objects.Reservation.Reservation;
 import src.objects.User.User;
 
 public class Main {
 
 	static ArrayList<User> users = new ArrayList<User>();
 	static ArrayList<Loan> loans = new ArrayList<Loan>();
+	static ArrayList<Reservation> reservations = new ArrayList<Reservation>();
 
 	private static void print(Object o) {
 		System.out.print(o.toString() + "\n");
 	}
 
-	private static void printBook(Book b) {
+	public static void printBook(Book b) {
 		print("========================================");
+		print("Id: " + b.getId());
 		print("Nome: " + b.getName());
 		print("Autores: " + b.getAuthors());
 		print("Ano: " + b.getYear());
@@ -29,17 +32,49 @@ public class Main {
 		print("========================================");
 	}
 
+	private static void printUser(User u) {
+		print("=========================================");
+		print("Id: " + u.getId());
+		print("Nome: " + u.getName());
+		print("Tipo: " + u.getUserType());
+		print("Livros emprestados: " + u.getLoans().size());
+		print("=========================================");
+	}
+
+	private static void printLoan(Loan l) {
+		print("=========================================");
+		print("Id: " + l.getId());
+		print("Id do Usuário: " + l.getUser().getId());
+		print("ISBN do livro: " + l.getBook().getId());
+		print("Usuário: " + l.getUser().getName());
+		print("Livro: " + l.getBook().getName());
+		print("Data de empréstimo: " + l.getDate());
+		print("Data de retorno: " + l.getReturnDate());
+		print("=========================================");
+	}
+
+	private static void printReservation(Reservation r) {
+		print("=========================================");
+		print("Id: " + r.getId());
+		print("Id do Usuário: " + r.getUser().getId());
+		print("Id do livro: " + r.getBook().getId());
+		print("Usuário: " + r.getUser().getName());
+		print("Livro: " + r.getBook().getName());
+		print("=========================================");
+	}
+
 	public static void bookMenu(Database db, Scanner scan) {
 		boolean running = true;
 		while (running) {
 			print("Digite a opção desejada: ");
 			print("1. Adicionar livro");
 			print("2. Remover livro");
-			print("3. Listar livros");
-			print("4: Buscar livro por ISBN");
-			print("5. Buscar livro por nome");
-			print("6. Buscar livro por editora");
-			print("7. Sair");
+			print("3. Editar livros");
+			print("4. Listar livros");
+			print("5. Buscar livro por ISBN");
+			print("6. Buscar livro por nome");
+			print("7. Buscar livro por editora");
+			print("8. Voltar");
 			int option = scan.nextInt();
 			switch (option) {
 				case 1:
@@ -65,13 +100,42 @@ public class Main {
 					db.removeBook(isbn);
 					break;
 				case 3:
+					print("Digite o ISBN do livro: ");
+					scan.nextLine();
+					String isbnEdit = scan.nextLine();
+					try {
+						book = db.getBookByISBN(isbnEdit);
+						print("==== EDITAR LIVRO ====");
+						printBook(book);
+						print("Digite o novo nome do livro: ");
+						String nameEdit = scan.nextLine();
+						print("Digite o novo nome do autor: ");
+						String authorsEdit = scan.nextLine();
+						print("Digite o novo ano de publicação: ");
+						int yearEdit = scan.nextInt();
+						print("Digite a edição: ");
+						int editionEdit = scan.nextInt();
+						print("Digite o novo nome da editora: ");
+						scan.nextLine();
+						String editorEdit = scan.nextLine();
+						book.setName(nameEdit);
+						book.setAuthors(authorsEdit);
+						book.setYear(yearEdit);
+						book.setEdition(editionEdit);
+						book.setEditor(editorEdit);
+						db.editBook(book);
+					} catch (Exception e) {
+						print(e.getMessage());
+					}
+					break;
+				case 4:
 					try {
 						db.listBooks();
 					} catch (Exception e) {
 						print(e.getMessage());
 					}
 					break;
-				case 4:
+				case 5:
 					print("Digite o ISBN do livro: ");
 					scan.nextLine();
 					String isbnSearch = scan.nextLine();
@@ -82,7 +146,29 @@ public class Main {
 						print(e.getMessage());
 					}
 					break;
+				case 6:
+					print("Digite o nome do livro: ");
+					scan.nextLine();
+					String nameSearch = scan.nextLine();
+					try {
+						ArrayList<Book> books = db.getBooksByName(nameSearch);
+						books.forEach(b -> printBook(b));
+					} catch (Exception e) {
+						print(e.getMessage());
+					}
+					break;
 				case 7:
+					print("Digite o nome da editora: ");
+					scan.nextLine();
+					String editorSearch = scan.nextLine();
+					try {
+						book = db.getBookByEditor(editorSearch);
+						printBook(book);
+					} catch (Exception e) {
+						print(e.getMessage());
+					}
+					break;
+				case 8:
 					running = false;
 					break;
 				default:
@@ -99,7 +185,9 @@ public class Main {
 			print("1. Adicionar usuário");
 			print("2. Remover usuário");
 			print("3. Listar usuários");
-			print("4. Voltar");
+			print("4. Buscar usuário por parte do nome");
+			print("5. buscar usuário por id");
+			print("6. Voltar");
 			int option = scan.nextInt();
 			switch (option) {
 				case 1:
@@ -141,14 +229,7 @@ public class Main {
 					break;
 				case 3:
 					try {
-						users.forEach(user -> {
-							print("=========================================");
-							print("Id: " + user.getId());
-							print("Nome: " + user.getName());
-							print("Tipo: " + user.getUserType());
-							print("Livros emprestados: " + user.getLoans().size());
-							print("=========================================");
-						});
+						users.forEach(user -> printUser(user));
 						if (users.size() == 0) throw new Exception(
 							"Nenhum usuário cadastrado!\n"
 						);
@@ -157,6 +238,45 @@ public class Main {
 					}
 					break;
 				case 4:
+					print("Digite o nome do usuário: ");
+					scan.nextLine();
+					String nameSearch = scan.nextLine();
+					try {
+						ArrayList<User> usersFound = new ArrayList<User>();
+						for (User user : users) {
+							if (user.getName().contains(nameSearch)) {
+								usersFound.add(user);
+							}
+						}
+						if (usersFound.size() == 0) throw new Exception(
+							"Nenhum usuário encontrado!\n"
+						);
+						usersFound.forEach(user -> printUser(user));
+					} catch (Exception e) {
+						print(e.getMessage());
+					}
+					break;
+				case 5:
+					print("Digite o id do usuário: ");
+					scan.nextLine();
+					String idSearch = scan.nextLine();
+					try {
+						User userFound = null;
+						for (User user : users) {
+							if (user.getId().equals(idSearch)) {
+								userFound = user;
+								break;
+							}
+						}
+						if (userFound == null) throw new Exception(
+							"Nenhum usuário encontrado!\n"
+						);
+						printUser(userFound);
+					} catch (Exception e) {
+						print(e.getMessage());
+					}
+					break;
+				case 6:
 					running = false;
 					break;
 				default:
@@ -171,17 +291,22 @@ public class Main {
 		while (running) {
 			print("Digite a opção desejada: ");
 			print("1. Adicionar empréstimo");
-			print("2. Remover empréstimo");
+			print("2. Devolver livro");
 			print("3. Listar empréstimos");
-			print("4. Voltar");
+			print("4. Renovar empréstimo");
+			print("5. Buscar empréstimos de livro por ISBN");
+			print("6. Buscar empréstimos de livro por título");
+			print("7: Buscar empréstimos por exemplar de livro");
+			print("8: Buscar empréstimo por usuário");
+			print("9. Voltar");
 			int option = scan.nextInt();
 			switch (option) {
 				case 1:
 					scan.nextLine();
 					print("Digite o nome do usuário: ");
 					String userName = scan.nextLine();
-					print("Digite o isbn do livro: ");
-					String isbn = scan.nextLine();
+					print("Digite o id do livro: ");
+					String id = scan.nextLine();
 					User user = null;
 					Book book = null;
 					try {
@@ -191,7 +316,7 @@ public class Main {
 							.findFirst();
 						user = u.get();
 
-						book = db.getBookByISBN(isbn);
+						book = db.getBookById(id);
 					} catch (Exception e) {
 						print(e.getMessage());
 						break;
@@ -204,6 +329,7 @@ public class Main {
 						LocalDate.now().plusDays(7).toString()
 					);
 					loans.add(loan);
+					user.addLoan(loan);
 					print("Empréstimo adicionado com sucesso!\n");
 					break;
 				case 2:
@@ -229,20 +355,233 @@ public class Main {
 					break;
 				case 3:
 					try {
-						loans.forEach(l -> {
-							print("=========================================");
-							print("Id: " + l.getId());
-							print("Usuário: " + l.getUser().getName());
-							print("Livro: " + l.getBook().getName());
-							print("Data de empréstimo: " + l.getDate());
-							print("Data de retorno: " + l.getReturnDate());
-							print("=========================================");
-						});
+						loans.forEach(l -> printLoan(l));
 					} catch (Exception e) {
 						print(e.getMessage());
 					}
 					break;
 				case 4:
+					print("Digite o id do empréstimo: ");
+					scan.nextLine();
+					String loanIdRenew = scan.nextLine();
+					try {
+						if (
+							loans
+								.stream()
+								.filter(x -> x.getId().equals(loanIdRenew))
+								.count() ==
+							0
+						) throw new Exception("Empréstimo não encontrado!\n");
+						Loan loanRenew = loans
+							.stream()
+							.filter(x -> x.getId().equals(loanIdRenew))
+							.findFirst()
+							.get();
+						loanRenew.setReturnDate(LocalDate.now().plusDays(7).toString());
+						print("Empréstimo renovado com sucesso!\n");
+					} catch (Exception e) {
+						print(e.getMessage());
+					}
+					break;
+				case 5:
+					print("Digite o isbn do livro: ");
+					scan.nextLine();
+					String isbnSearch = scan.nextLine();
+					try {
+						ArrayList<Loan> loansFound = new ArrayList<Loan>();
+						for (Loan l : loans) {
+							if (l.getBook().getIsbn().equals(isbnSearch)) {
+								loansFound.add(l);
+							}
+						}
+						if (loansFound.size() == 0) throw new Exception(
+							"Nenhum empréstimo encontrado!\n"
+						);
+						loansFound.forEach(l -> printLoan(l));
+					} catch (Exception e) {
+						print(e.getMessage());
+					}
+					break;
+				case 6:
+					print("Digite o título do livro: ");
+					scan.nextLine();
+					String titleSearch = scan.nextLine();
+					try {
+						ArrayList<Loan> loansFound = new ArrayList<Loan>();
+						for (Loan l : loans) {
+							if (l.getBook().getName().equals(titleSearch)) {
+								loansFound.add(l);
+							}
+						}
+						if (loansFound.size() == 0) throw new Exception(
+							"Nenhum empréstimo encontrado!\n"
+						);
+						loansFound.forEach(l -> printLoan(l));
+					} catch (Exception e) {
+						print(e.getMessage());
+					}
+					break;
+				case 7:
+					print("Digite o id do exemplar: ");
+					scan.nextLine();
+					String copyIdSearch = scan.nextLine();
+					try {
+						ArrayList<Loan> loansFound = new ArrayList<Loan>();
+						for (Loan l : loans) {
+							if (l.getBook().getId().equals(copyIdSearch)) {
+								loansFound.add(l);
+							}
+						}
+						if (loansFound.size() == 0) throw new Exception(
+							"Nenhum empréstimo encontrado!\n"
+						);
+						loansFound.forEach(l -> printLoan(l));
+					} catch (Exception e) {
+						print(e.getMessage());
+					}
+					break;
+				case 8:
+					print("Digite o nome do usuário: ");
+					scan.nextLine();
+					String userNameSearch = scan.nextLine();
+					try {
+						ArrayList<Loan> loansFound = new ArrayList<Loan>();
+						for (Loan l : loans) {
+							if (l.getUser().getName().equals(userNameSearch)) {
+								loansFound.add(l);
+							}
+						}
+						if (loansFound.size() == 0) throw new Exception(
+							"Nenhum empréstimo encontrado!\n"
+						);
+						loansFound.forEach(l -> printLoan(l));
+					} catch (Exception e) {
+						print(e.getMessage());
+					}
+					break;
+				case 9:
+					running = false;
+					break;
+				default:
+					print("Opção inválida");
+					break;
+			}
+		}
+	}
+
+	private static void reservationMenu(Database db, Scanner scan) {
+		boolean running = true;
+		while (running) {
+			print("========= Reserva =========");
+			print("1. Adicionar reserva");
+			print("2. Remover reserva");
+			print("3. Listar reservas");
+			print("4. Listar reservas por livro");
+			print("5. Listar reservas por usuário");
+			print("6. Voltar");
+			print("Digite uma opção: ");
+			int option = scan.nextInt();
+			switch (option) {
+				case 1:
+					print("Digite o id do exemplar: ");
+					scan.nextLine();
+					String copyId = scan.nextLine();
+					print("Digite o nome do usuário: ");
+					String userName = scan.nextLine();
+					try {
+						if (
+							users
+								.stream()
+								.filter(x -> x.getName().equals(userName))
+								.count() ==
+							0
+						) throw new Exception("Usuário não encontrado!\n");
+						Book book = db.getBookById(copyId);
+						User user = users
+							.stream()
+							.filter(x -> x.getName().equals(userName))
+							.findFirst()
+							.get();
+						Reservation reservation = new Reservation(user, book);
+						reservations.add(reservation);
+						print("Reserva adicionada com sucesso!\n");
+					} catch (Exception e) {
+						print(e.getMessage());
+					}
+					break;
+				case 2:
+					print("Digite o id da reserva: ");
+					scan.nextLine();
+					String reservationId = scan.nextLine();
+					try {
+						if (
+							reservations
+								.stream()
+								.filter(x -> x.getId().equals(reservationId))
+								.count() ==
+							0
+						) throw new Exception("Reserva não encontrada!\n");
+						reservations.remove(
+							reservations
+								.stream()
+								.filter(x -> x.getId().equals(reservationId))
+								.findFirst()
+								.get()
+						);
+						print("Reserva removida com sucesso!\n");
+					} catch (Exception e) {
+						print(e.getMessage());
+					}
+					break;
+				case 3:
+					try {
+						if (reservations.size() == 0) throw new Exception(
+							"Nenhuma reserva encontrada!\n"
+						);
+						reservations.forEach(r -> printReservation(r));
+					} catch (Exception e) {
+						print(e.getMessage());
+					}
+					break;
+				case 4:
+					print("Digite o id do exemplar: ");
+					scan.nextLine();
+					String copyIdSearch = scan.nextLine();
+					try {
+						ArrayList<Reservation> reservationsFound = new ArrayList<Reservation>();
+						for (Reservation r : reservations) {
+							if (r.getBook().getId().equals(copyIdSearch)) {
+								reservationsFound.add(r);
+							}
+						}
+						if (reservationsFound.size() == 0) throw new Exception(
+							"Nenhuma reserva encontrada!\n"
+						);
+						reservationsFound.forEach(r -> printReservation(r));
+					} catch (Exception e) {
+						print(e.getMessage());
+					}
+					break;
+				case 5:
+					print("Digite o nome do usuário: ");
+					scan.nextLine();
+					String userNameSearch = scan.nextLine();
+					try {
+						ArrayList<Reservation> reservationsFound = new ArrayList<Reservation>();
+						for (Reservation r : reservations) {
+							if (r.getUser().getName().equals(userNameSearch)) {
+								reservationsFound.add(r);
+							}
+						}
+						if (reservationsFound.size() == 0) throw new Exception(
+							"Nenhuma reserva encontrada!\n"
+						);
+						reservationsFound.forEach(r -> printReservation(r));
+					} catch (Exception e) {
+						print(e.getMessage());
+					}
+					break;
+				case 6:
 					running = false;
 					break;
 				default:
@@ -274,7 +613,8 @@ public class Main {
 			print("1. Usuários");
 			print("2. Livros");
 			print("3. Empréstimos");
-			print("4. Sair");
+			print("4. Reservas");
+			print("5. Sair");
 			int option = scan.nextInt();
 			switch (option) {
 				case 1:
@@ -287,6 +627,9 @@ public class Main {
 					loanMenu(db, scan);
 					break;
 				case 4:
+					reservationMenu(db, scan);
+					break;
+				case 5:
 					running = false;
 					break;
 				default:
