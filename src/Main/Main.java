@@ -1,7 +1,10 @@
 package src.Main;
 
+import java.text.NumberFormat;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Scanner;
 import src.database.Database.Database;
@@ -37,7 +40,12 @@ public class Main {
 		print("Id: " + u.getId());
 		print("Nome: " + u.getName());
 		print("Tipo: " + u.getUserType());
-		print("Livros emprestados: " + u.getLoans().size());
+		print(
+			"Valor em multas: " +
+			NumberFormat
+				.getCurrencyInstance(new Locale("pt", "BR"))
+				.format(u.getPenalty())
+		);
 		print("=========================================");
 	}
 
@@ -61,6 +69,16 @@ public class Main {
 		print("Usuário: " + r.getUser().getName());
 		print("Livro: " + r.getBook().getName());
 		print("=========================================");
+	}
+
+	private static int getNumberOfLoans(User u) {
+		int count = 0;
+		for (Loan l : loans) {
+			if (l.getUser().getId().equals(u.getId())) {
+				count++;
+			}
+		}
+		return count;
 	}
 
 	public static void bookMenu(Database db, Scanner scan) {
@@ -186,8 +204,9 @@ public class Main {
 			print("2. Remover usuário");
 			print("3. Listar usuários");
 			print("4. Buscar usuário por parte do nome");
-			print("5. buscar usuário por id");
-			print("6. Voltar");
+			print("5. Buscar usuário por id");
+			print("6: Pagar multa");
+			print("7. Voltar");
 			int option = scan.nextInt();
 			switch (option) {
 				case 1:
@@ -277,6 +296,26 @@ public class Main {
 					}
 					break;
 				case 6:
+					print("Digite o id do usuário que pagará sua multa: ");
+					scan.nextLine();
+					String id = scan.nextLine();
+					try {
+						User userFound = null;
+						for (User user : users) {
+							if (user.getId().equals(id)) {
+								userFound = user;
+								break;
+							}
+						}
+						if (userFound == null) throw new Exception(
+							"Nenhum usuário encontrado!\n"
+						);
+						userFound.setPenalty(0);
+						print("Multa paga com sucesso!\n");
+					} catch (Exception e) {
+						print(e.getMessage());
+					}
+				case 7:
 					running = false;
 					break;
 				default:
@@ -290,7 +329,7 @@ public class Main {
 		boolean running = true;
 		while (running) {
 			print("Digite a opção desejada: ");
-			print("1. Adicionar empréstimo");
+			print("1. Fazer empréstimo");
 			print("2. Devolver livro");
 			print("3. Listar empréstimos");
 			print("4. Renovar empréstimo");
@@ -307,30 +346,49 @@ public class Main {
 					String userName = scan.nextLine();
 					print("Digite o id do livro: ");
 					String id = scan.nextLine();
-					User user = null;
-					Book book = null;
 					try {
 						Optional<User> u = users
 							.stream()
 							.filter(x -> x.getName().equals(userName))
 							.findFirst();
-						user = u.get();
+						User user = u.get();
+						if (
+							user.getPenalty() > 0 && getNumberOfLoans(user) > 0
+						) throw new Exception(
+							"Usuário com multa pendente, não é possível realizar empréstimo!\n"
+						);
 
-						book = db.getBookById(id);
+						int daysToLoan = 0;
+						if (user.getUserType().toLowerCase() == "professor") {
+							daysToLoan = 15;
+							if (getNumberOfLoans(user) > 5) throw new Exception(
+								"Professor não pode ter mais de 5 livros emprestados!\n"
+							);
+						} else {
+							daysToLoan = 7;
+							if (getNumberOfLoans(user) > 3) throw new Exception(
+								"Aluno não pode ter mais de 3 livros emprestados!\n"
+							);
+						}
+
+						Book book = db.getBookById(id);
+						for (Reservation reservation : reservations) {
+							if (reservation.getBook().getId().equals(id)) throw new Exception(
+								"Outro usuário já possui reserva para este livro!\n"
+							);
+						}
+						LocalDate.now();
+						Loan loan = new Loan(
+							book,
+							user,
+							LocalDate.now(),
+							LocalDate.now().plusDays(daysToLoan)
+						);
+						loans.add(loan);
+						print("Empréstimo realizado com sucesso!\n");
 					} catch (Exception e) {
 						print(e.getMessage());
-						break;
 					}
-					LocalDate.now();
-					Loan loan = new Loan(
-						book,
-						user,
-						LocalDate.now().toString(),
-						LocalDate.now().plusDays(7).toString()
-					);
-					loans.add(loan);
-					user.addLoan(loan);
-					print("Empréstimo adicionado com sucesso!\n");
 					break;
 				case 2:
 					print("Digite o id do empréstimo: ");
@@ -340,15 +398,24 @@ public class Main {
 						if (
 							loans.stream().filter(x -> x.getId().equals(loanId)).count() == 0
 						) throw new Exception("Empréstimo não encontrado!\n");
-						loans.remove(
-							loans
-								.stream()
-								.filter(x -> x.getId().equals(loanId))
-								.findFirst()
-								.get()
-						);
+						Loan loan = loans
+							.stream()
+							.filter(x -> x.getId().equals(loanId))
+							.findFirst()
+							.get();
 
-						print("Empréstimo removido com sucesso!\n");
+						if (LocalDate.now().isAfter(loan.getReturnDate())) {
+							int days = (int) ChronoUnit.DAYS.between(
+								LocalDate.now(),
+								loan.getReturnDate()
+							);
+							int prevPenalty = loan.getUser().getPenalty();
+							loan.getUser().setPenalty(prevPenalty + days);
+						}
+
+						loans.remove(loan);
+
+						print("Livro devolvido com sucesso!\n");
 					} catch (Exception e) {
 						print(e.getMessage());
 					}
@@ -377,7 +444,7 @@ public class Main {
 							.filter(x -> x.getId().equals(loanIdRenew))
 							.findFirst()
 							.get();
-						loanRenew.setReturnDate(LocalDate.now().plusDays(7).toString());
+						loanRenew.setReturnDate(LocalDate.now().plusDays(7));
 						print("Empréstimo renovado com sucesso!\n");
 					} catch (Exception e) {
 						print(e.getMessage());
@@ -473,7 +540,7 @@ public class Main {
 		boolean running = true;
 		while (running) {
 			print("========= Reserva =========");
-			print("1. Adicionar reserva");
+			print("1. Fazer reserva");
 			print("2. Remover reserva");
 			print("3. Listar reservas");
 			print("4. Listar reservas por livro");
@@ -496,15 +563,39 @@ public class Main {
 								.count() ==
 							0
 						) throw new Exception("Usuário não encontrado!\n");
+
+						for (Reservation r : reservations) {
+							if (r.getBook().getId().equals(copyId)) {
+								throw new Exception(
+									"Exemplar já reservado por outro usuário!\n"
+								);
+							}
+						}
+
 						Book book = db.getBookById(copyId);
+						for (Loan l : loans) {
+							if (l.getBook().getId().equals(copyId)) {
+								throw new Exception(
+									"Exemplar já emprestado para outro usuário!\n"
+								);
+							}
+						}
+
 						User user = users
 							.stream()
 							.filter(x -> x.getName().equals(userName))
 							.findFirst()
 							.get();
+
+						if (user.getPenalty() > 0) {
+							throw new Exception(
+								"Usuário com multa não pode reservar livros!\n"
+							);
+						}
+
 						Reservation reservation = new Reservation(user, book);
 						reservations.add(reservation);
-						print("Reserva adicionada com sucesso!\n");
+						print("Reserva realizada com sucesso!\n");
 					} catch (Exception e) {
 						print(e.getMessage());
 					}
@@ -544,13 +635,13 @@ public class Main {
 					}
 					break;
 				case 4:
-					print("Digite o id do exemplar: ");
+					print("Digite o nome do livro: ");
 					scan.nextLine();
-					String copyIdSearch = scan.nextLine();
+					String bookName = scan.nextLine();
 					try {
 						ArrayList<Reservation> reservationsFound = new ArrayList<Reservation>();
 						for (Reservation r : reservations) {
-							if (r.getBook().getId().equals(copyIdSearch)) {
+							if (r.getBook().getName().equals(bookName)) {
 								reservationsFound.add(r);
 							}
 						}

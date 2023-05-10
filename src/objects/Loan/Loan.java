@@ -1,5 +1,6 @@
 package src.objects.Loan;
 
+import java.time.LocalDate;
 import java.util.UUID;
 import src.objects.Book.Book;
 import src.objects.User.User;
@@ -9,10 +10,10 @@ public class Loan {
 	private String id;
 	private Book book;
 	private User user;
-	private String date;
-	private String returnDate;
+	private LocalDate date;
+	private LocalDate returnDate;
 
-	public Loan(Book book, User user, String date, String returnDate) {
+	public Loan(Book book, User user, LocalDate date, LocalDate returnDate) {
 		UUID uuid = UUID.randomUUID();
 		this.id = uuid.toString();
 		this.book = book;
@@ -25,7 +26,7 @@ public class Loan {
 		return book;
 	}
 
-	public String getDate() {
+	public LocalDate getDate() {
 		return date;
 	}
 
@@ -33,7 +34,7 @@ public class Loan {
 		return id;
 	}
 
-	public String getReturnDate() {
+	public LocalDate getReturnDate() {
 		return returnDate;
 	}
 
@@ -41,11 +42,11 @@ public class Loan {
 		return user;
 	}
 
-	public void setDate(String date) {
+	public void setDate(LocalDate date) {
 		this.date = date;
 	}
 
-	public void setReturnDate(String returnDate) {
+	public void setReturnDate(LocalDate returnDate) {
 		this.returnDate = returnDate;
 	}
 }

@@ -8,13 +8,8 @@ public class User {
 
 	private String id;
 	private String name;
-	private float penalty;
+	private int penalty;
 	private String userType;
-	private ArrayList<Loan> loans;
-
-	public void addLoan(Loan loan) {
-		this.loans.add(loan);
-	}
 
 	public User(String name, String userType) {
 		UUID uuid = UUID.randomUUID();
@@ -22,7 +17,6 @@ public class User {
 		this.name = name;
 		this.penalty = 0;
 		this.userType = userType;
-		this.loans = new ArrayList<Loan>();
 	}
 
 	public String getId() {
@@ -33,7 +27,7 @@ public class User {
 		return name;
 	}
 
-	public float getPenalty() {
+	public int getPenalty() {
 		return penalty;
 	}
 
@@ -41,11 +35,7 @@ public class User {
 		return userType;
 	}
 
-	public ArrayList<Loan> getLoans() {
-		return loans;
-	}
-
-	public void setPenalty(float penalty) {
+	public void setPenalty(int penalty) {
 		this.penalty = penalty;
 	}
 }
