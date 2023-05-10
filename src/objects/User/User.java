@@ -1,8 +1,6 @@
 package src.objects.User;
 
-import java.util.ArrayList;
 import java.util.UUID;
-import src.objects.Loan.Loan;
 
 public class User {
 
