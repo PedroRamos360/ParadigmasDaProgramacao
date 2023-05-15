@@ -694,7 +694,10 @@ public class Main {
 	public static void main(String[] args) {
 		Database db = new Database();
 		db.createNewDatabase();
-		populateUsers();
+
+		// Descomentar a linha abaixo caso seja necessário adicionar usuários para testes
+		// populateUsers();
+
 		Scanner scan = new Scanner(System.in);
 
 		boolean running = true;
