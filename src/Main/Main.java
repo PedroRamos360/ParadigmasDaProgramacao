@@ -53,7 +53,7 @@ public class Main {
 		print("=========================================");
 		print("Id: " + l.getId());
 		print("Id do Usuário: " + l.getUser().getId());
-		print("ISBN do livro: " + l.getBook().getId());
+		print("Id do livro: " + l.getBook().getId());
 		print("Usuário: " + l.getUser().getName());
 		print("Livro: " + l.getBook().getName());
 		print("Data de empréstimo: " + l.getDate());
