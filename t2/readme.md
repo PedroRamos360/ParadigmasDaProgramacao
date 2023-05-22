@@ -1,4 +1,4 @@
-# Trabalho 2 - Estrutura de dados
+# Trabalho 2 - Paradigmas da programação
 
 ## Exercícios de streams e funções lambda
 
