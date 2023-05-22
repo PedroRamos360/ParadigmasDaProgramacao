@@ -39,5 +39,7 @@ public class ContagemVotos02 {
       "Total de votos em branco: " +
       votosCandidatos.stream().filter(n -> n == 6).count()
     );
+
+    scanner.close();
   }
 }

@@ -53,5 +53,6 @@ public class PesquisaPrefeitura01 {
       "Percentual de pessoas com salário até R$ 1000,00: %.2f%%\n",
       percentualAteMil
     );
+    scanner.close();
   }
 }
