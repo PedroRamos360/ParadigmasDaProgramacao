@@ -1,1 +1,1 @@
-javac src/util/PopulateAssets/PopulateAssets.java; java -cp ".:sqlite-jdbc-3.41.2.1.jar" src.util.PopulateAssets.PopulateAssets
+javac src/PopulateAssets/PopulateAssets.java; java -cp ".:sqlite-jdbc-3.42.0.0.jar" src.PopulateAssets.PopulateAssets

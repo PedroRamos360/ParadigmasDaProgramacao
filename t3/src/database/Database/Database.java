@@ -5,6 +5,9 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import src.Asset.Asset;
+import src.Util.U;
+
 public class Database {
 
 	Connection connection = null;
@@ -12,8 +15,7 @@ public class Database {
 
 	public Database() {
 		try {
-			this.connection =
-				DriverManager.getConnection("jdbc:sqlite:src/database/database.db");
+			this.connection = DriverManager.getConnection("jdbc:sqlite:src/database/database.db");
 			this.statement = connection.createStatement();
 		} catch (SQLException e) {
 			System.err.println(e.getMessage());
@@ -23,8 +25,7 @@ public class Database {
 	public void createNewDatabase() {
 		try {
 			this.statement.executeUpdate(
-					"create table assets (ticker text, name text, price float, type text)"
-				);
+					"create table assets (ticker text, name text, price float, type text)");
 		} catch (SQLException e) {
 			if (!e.getMessage().contains("table assets already exists")) {
 				System.err.println(e.getMessage());
@@ -32,9 +33,26 @@ public class Database {
 		}
 	}
 
+	public void addAsset(Asset asset) {
+		try {
+			String update = String.format(
+					"insert into assets (ticker, name, price, type) values ('%s', '%s', '%f', '%s')",
+					asset.getTicker(),
+					asset.getName(),
+					asset.getPrice(),
+					asset.getType());
+			this.statement.executeUpdate(update);
+
+			U.print("Ativo adicionado com sucesso!\n");
+		} catch (SQLException e) {
+			System.err.println(e.getMessage());
+		}
+	}
+
 	public void closeConnection() {
 		try {
-			if (connection != null) connection.close();
+			if (connection != null)
+				connection.close();
 		} catch (SQLException e) {
 			System.err.println(e.getMessage());
 		}
