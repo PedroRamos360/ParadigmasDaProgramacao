@@ -1,11 +1,14 @@
+package src.Main;
+
 import java.util.Scanner;
 
+import src.Util.U;
 import src.database.Database.Database;
 
-public class Main {
+public class Main extends U {
 
 	public static void main(String[] args) {
-
+		Database.createNewDatabase();
 		exibirMenu();
 	}
 
@@ -14,21 +17,23 @@ public class Main {
 		int opcao = 0;
 
 		do {
-			System.out.println("\n===== MENU =====");
-			System.out.println("1. Incluir ativo");
-			System.out.println("2. Excluir ativo");
-			System.out.println("3. Sair");
+			print("\n===== MENU =====");
+			print("1. Comprar ativo");
+			print("2. Vender ativo");
+			print("3. Carteira de Investimentos");
+			print("4. Listar ativos");
+			print("5. Sair");
 			System.out.print("Escolha uma opção: ");
 
 			try {
 				opcao = scanner.nextInt();
-				scanner.nextLine(); // Limpa o buffer do scanner
+				scanner.nextLine();
 				processarOpcao(opcao);
 			} catch (Exception e) {
 				System.out.println("Opção inválida! Tente novamente.");
-				scanner.nextLine(); // Limpa o buffer do scanner
+				scanner.nextLine();
 			}
-		} while (opcao != 3);
+		} while (opcao != 5);
 
 		scanner.close();
 	}
@@ -38,29 +43,30 @@ public class Main {
 
 		switch (opcao) {
 			case 1:
-				System.out.print("Digite o ticker do ativo: ");
+				print("Digite o ticker do ativo a ser comprado: ");
 				String ticker = scanner.nextLine();
-				System.out.print("Digite o nome da empresa: ");
-				String nome = scanner.nextLine();
-				System.out.print("Digite o tipo do ativo (1 - Ações, 2 - BDRs, 3 - ETFs, 4 - Fundos Imobiliários): ");
-				int tipoId = scanner.nextInt();
-				scanner.nextLine(); // Limpa o buffer do scanner
 
-				// Database.incluirAtivo(ticker, nome, tipoId);
-				System.out.println("Ativo incluído com sucesso!");
+				Database.addPortfolioAsset(ticker);
 				break;
 			case 2:
-				System.out.print("Digite o ticker do ativo a ser excluído: ");
-				String tickerExclusao = scanner.nextLine();
+				print("Digite o ticker do ativo a ser vendido: ");
+				String deleteTicker = scanner.nextLine();
 
-				// Database.excluirAtivo(tickerExclusao);
-				System.out.println("Ativo excluído com sucesso!");
+				Database.removePortfolioAsset(deleteTicker);
 				break;
+
 			case 3:
-				System.out.println("Encerrando o programa...");
+				Database.displayPortfolio();
+				break;
+
+			case 4:
+				Database.listAssets();
+				break;
+			case 5:
+				print("Encerrando o programa...");
 				break;
 			default:
-				System.out.println("Opção inválida! Tente novamente.");
+				print("Opção inválida! Tente novamente.");
 				break;
 		}
 	}

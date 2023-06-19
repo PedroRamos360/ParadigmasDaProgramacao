@@ -1,0 +1,27 @@
+✅⏳️
+
+- Crie uma base de dados de ativos financeiros ✅
+- Cada ativo é descrito por  um ticker (NASD11, HGLG11, AAPL34, VALE3) e pelo nome da empresa. ✅
+- Tipos pré-definidos são: ações, BDRs, ETFs e fundos imobiliários. ✅
+- Para cada dia, cada ativo deverá ter uma cotação (valor) na base de dados, representada pelo valor
+de fechamento do ativo no dia. ✅
+
+Carteira de investimentos:
+- Incluir ativos (Compra)
+- Excluir ativos  (Venda)
+- A carteira de investimentos deve ser armazenada em um banco de dados.
+- Tratamento de exceções 
+
+Para um determinado período escolhido pelo usuário mostrar:
+- Rentabilidade total da carteira
+- Percentuais de ganho/perda de cada ativo na carteira
+- O valor de ganho/perda
+- Preço médio de aquisição de cada ativo
+Comparar a rentabilidade obtida com um benchmark: 
+- Ações:IBOV 
+- BDRs: BDRX 
+- FIIs: IFIX 
+- ETFs: Nacionais: IBOV, 
+			Internacionais: SPX
+- Mostrar a rentabilidade por tipo de ativo
+- O percentual em cada tipo

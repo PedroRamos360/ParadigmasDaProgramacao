@@ -1,6 +1,8 @@
 package src.Asset;
 
-public class Asset {
+import src.Util.U;
+
+public class Asset extends U {
 	private String ticker;
 	private String name;
 	private float price;
@@ -27,14 +29,5 @@ public class Asset {
 
 	public String getType() {
 		return this.type;
-	}
-
-	public String toString() {
-		return String.format(
-				"Ticker: %s\nName: %s\nPrice: %.2f\nType: %s\n",
-				this.ticker,
-				this.name,
-				this.price,
-				this.type);
 	}
 }
