@@ -56,13 +56,33 @@ public class Database extends U {
 					"CREATE TABLE assets (ticker TEXT, name TEXT, price FLOAT, type TEXT)");
 			statement.executeUpdate(
 					"CREATE TABLE portfolioAssets (ticker TEXT, name TEXT, price FLOAT, type TEXT)");
+			statement.executeUpdate(
+					"CREATE TABLE balance (balance FLOAT)");
 			PopulateAssets.populateAssets();
+			String update = String.format(
+					"insert into balance (balance) values ('%f')", 0f);
+			statement.executeUpdate(update);
 		} catch (SQLException e) {
 			if (!e.getMessage().contains("table assets already exists")) {
 				System.err.println(e.getMessage());
 			}
 		}
 		closeConnection(connection);
+	}
+
+	public static float getBalance() {
+		Connection connection = getConnection();
+		Statement statement = getStatement(connection);
+		float balance = 0;
+		try {
+			ResultSet resultSet = statement.executeQuery("SELECT * from balance");
+			balance = resultSet.getFloat("balance");
+		} catch (SQLException e) {
+			print(e.getMessage());
+		}
+		closeConnection(connection);
+		return balance;
+
 	}
 
 	public static Asset getAsset(String ticker) {
@@ -72,6 +92,8 @@ public class Database extends U {
 		try {
 			String query = String.format("select * from assets where ticker = '%s'", ticker);
 			ResultSet resultSet = statement.executeQuery(query);
+			if (!resultSet.next())
+				throw new RuntimeException("O ativo digitado não existe");
 			asset = new Asset(
 					resultSet.getString("ticker"),
 					resultSet.getString("name"),
@@ -108,6 +130,9 @@ public class Database extends U {
 		Statement statement = getStatement(connection);
 		try {
 			Asset asset = getAsset(ticker);
+			if (asset.getPrice() > getBalance())
+				throw new RuntimeException(
+						asset.getTicker() + " custa " + asset.getPrice() + " reais você tem apenas " + getBalance() + " reais");
 			String update = String.format(
 					"insert into portfolioAssets (ticker, name, price, type) values ('%s', '%s', '%f', '%s')",
 					asset.getTicker(),
@@ -119,6 +144,8 @@ public class Database extends U {
 			print("Ativo comprado com sucesso por R$ " + asset.getPrice() + "\n");
 		} catch (SQLException e) {
 			System.err.println(e.getMessage());
+		} catch (RuntimeException e) {
+			print(e.getMessage());
 		}
 		closeConnection(connection);
 	}
@@ -127,12 +154,15 @@ public class Database extends U {
 		Connection connection = getConnection();
 		Statement statement = getStatement(connection);
 		try {
+			Asset asset = getAsset(ticker);
+
 			String update = String.format("delete from portfolioAssets where ticker = '%s'", ticker);
 			statement.executeUpdate(update);
-			Asset asset = getAsset(ticker);
 			print("Ativo vendido com sucesso por R$ " + asset.getPrice() + "\n");
 		} catch (SQLException e) {
 			System.err.println(e.getMessage());
+		} catch (RuntimeException e) {
+			print("O ativo digitado não existe");
 		}
 		closeConnection(connection);
 	}
@@ -142,6 +172,10 @@ public class Database extends U {
 		Statement statement = getStatement(connection);
 		try {
 			ResultSet resultSet = statement.executeQuery("select * from portfolioAssets");
+			float balance = getBalance();
+			print("+++++++++++++++++++++++++++++++++++++++++");
+			print("Total não investido na conta: " + balance + " reais");
+			print("+++++++++++++++++++++++++++++++++++++++++");
 			while (resultSet.next()) {
 				Asset asset = new Asset(
 						resultSet.getString("ticker"),
@@ -152,6 +186,38 @@ public class Database extends U {
 			}
 		} catch (SQLException e) {
 			System.err.println(e.getMessage());
+		}
+		closeConnection(connection);
+	}
+
+	public static void balanceDeposit(float value) {
+		Connection connection = getConnection();
+		Statement statement = getStatement(connection);
+		try {
+			float oldBalance = getBalance();
+			String update = "UPDATE balance SET balance =" + (value + oldBalance);
+			statement.executeUpdate(update);
+			print("Seus " + value + " reais foram depositados com sucesso!");
+		} catch (SQLException e) {
+			print(e.getMessage());
+		}
+		closeConnection(connection);
+	}
+
+	public static void balanceWithdraw(float value) {
+		Connection connection = getConnection();
+		Statement statement = getStatement(connection);
+		try {
+			float oldBalance = getBalance();
+			if (oldBalance < value)
+				throw new RuntimeException("Você tem apenas " + value + " reais na sua conta!");
+			String update = "UPDATE balance SET balance =" + (oldBalance - value);
+			statement.executeUpdate(update);
+			print("Seus " + value + " reais foram sacados com sucesso!");
+		} catch (SQLException e) {
+			print(e.getMessage());
+		} catch (RuntimeException e) {
+			print(e.getMessage());
 		}
 		closeConnection(connection);
 	}
@@ -169,6 +235,8 @@ public class Database extends U {
 			statement.executeUpdate(update);
 		} catch (SQLException e) {
 			System.err.println(e.getMessage());
+		} catch (RuntimeException e) {
+			print(e.getMessage());
 		}
 		closeConnection(connection);
 	}

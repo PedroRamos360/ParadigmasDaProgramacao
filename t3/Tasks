@@ -7,8 +7,17 @@
 de fechamento do ativo no dia. ✅
 
 Carteira de investimentos:
-- Incluir ativos (Compra)
-- Excluir ativos  (Venda)
+- Incluir ativos (Compra)✅
+- Excluir ativos  (Venda)✅
+- Tratar erro para quando ativo digitado não existe (Compra)✅
+- Tratar erro para quando ativo digitado não existe (Venda)✅
+- Criação de tabela com o valor da carteira ✅
+- Função para depositar dinheiro na conta ✅
+- Função para sacar dinheiro da conta ✅
+- Tratamento do caso de retirar mais dinheiro do que tem na conta ✅
+- Mostrar balance na carteira de investimentos ✅
+- Verificar se usuário tem dinheiro para comprar ✅
+- Adicionar dinheiro na conta caso usuário venda ação ⏳️
 - A carteira de investimentos deve ser armazenada em um banco de dados.
 - Tratamento de exceções 
 
