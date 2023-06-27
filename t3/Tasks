@@ -17,9 +17,9 @@ Carteira de investimentos:
 - Tratamento do caso de retirar mais dinheiro do que tem na conta ✅
 - Mostrar balance na carteira de investimentos ✅
 - Verificar se usuário tem dinheiro para comprar ✅
-- Adicionar dinheiro na conta caso usuário venda ação ⏳️
-- A carteira de investimentos deve ser armazenada em um banco de dados.
-- Tratamento de exceções 
+- Adicionar dinheiro na conta caso usuário venda ação ✅
+- A carteira de investimentos deve ser armazenada em um banco de dados. ✅
+- Tratamento de exceções ✅
 
 Para um determinado período escolhido pelo usuário mostrar:
 - Rentabilidade total da carteira

@@ -5,12 +5,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import src.Asset.Asset;
 import src.database.Database.Database;
 
 public class PopulateAssets {
-	private static String getActionValue(String ticker) {
+	public static Float getActionValue(String ticker) {
 		try {
 			URL url = new URL("https://brapi.dev/api/quote/" + ticker);
 
@@ -29,7 +31,15 @@ public class PopulateAssets {
 
 			connection.disconnect();
 
-			return response.toString();
+			String regex = "\"regularMarketPrice\"\\s*:\\s*([^,\\}]*)";
+			Pattern pattern = Pattern.compile(regex);
+			Matcher matcher = pattern.matcher(response.toString());
+
+			if (matcher.find()) {
+				String value = matcher.group(1);
+				return Float.parseFloat(value);
+			}
+			return null;
 		} catch (IOException e) {
 			e.printStackTrace();
 			return null;
@@ -38,27 +48,27 @@ public class PopulateAssets {
 
 	public static void populateAssets() {
 		// Ações
-		Asset asset = new Asset("PETR4", "Petrobras", 25.0f, "Ação");
+		Asset asset = new Asset("PETR4", "Petrobras", getActionValue("PETR4"), "Ação");
 		Database.addAsset(asset);
-		asset = new Asset("VALE3", "Vale", 50.0f, "Ação");
+		asset = new Asset("VALE3", "Vale", getActionValue("VALE3"), "Ação");
 		Database.addAsset(asset);
 
 		// BDRs
-		asset = new Asset("AAPL34", "Apple", 100.0f, "BDR");
+		asset = new Asset("AAPL34", "Apple", getActionValue("AAPL34"), "BDR");
 		Database.addAsset(asset);
-		asset = new Asset("MSFT34", "Microsoft", 200.0f, "BDR");
+		asset = new Asset("MSFT34", "Microsoft", getActionValue("MSFT34"), "BDR");
 		Database.addAsset(asset);
 
 		// ETFs
-		asset = new Asset("BOVA11", "iShares Ibovespa", 150.0f, "ETF");
+		asset = new Asset("BOVA11", "iShares Ibovespa", getActionValue("BOVA11"), "ETF");
 		Database.addAsset(asset);
-		asset = new Asset("SMAL11", "iShares Small Cap", 100.0f, "ETF");
+		asset = new Asset("SMAL11", "iShares Small Cap", getActionValue("SMAL11"), "ETF");
 		Database.addAsset(asset);
 
 		// FIIs
-		asset = new Asset("HGLG11", "CSHG Logística", 200.0f, "FII");
+		asset = new Asset("HGLG11", "CSHG Logística", getActionValue("HGLG11"), "FII");
 		Database.addAsset(asset);
-		asset = new Asset("HGRE11", "CSHG Real Estate", 300.0f, "FII");
+		asset = new Asset("HGRE11", "CSHG Real Estate", getActionValue("HGRE11"), "FII");
 		Database.addAsset(asset);
 	}
 }

@@ -7,6 +7,7 @@ public class Asset extends U {
 	private String name;
 	private float price;
 	private String type;
+	public float profit;
 
 	public Asset(String ticker, String name, float price, String type) {
 		this.ticker = ticker;
