@@ -16,4 +16,4 @@
 
 ## Extração dos valores dos ativos
 
-Para a extração dos valores dos ativos atualizados é feito por requisições get para a API gratuita da brapi dev portanto é importante lembrar que é necessário estar conectado na internet para rodar o projeto
+A extração dos valores dos ativos atualizados é feito por requisições get para a API gratuita da brapi dev portanto é importante lembrar que é necessário estar conectado na internet para rodar o projeto
