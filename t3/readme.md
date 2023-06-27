@@ -1,4 +1,4 @@
-# Instruções para rodar o projeto
+# Detalhes sobre o projeto
 
 ## Baixar sqlite-jdbc
 
